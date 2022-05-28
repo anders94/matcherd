@@ -1,16 +1,16 @@
 set(sources
-    src/tmp.cpp
+	src/matcherd.cpp
 )
 
 set(exe_sources
-		src/main.cpp
-		${sources}
+	${sources}
 )
 
 set(headers
-    include/project/tmp.hpp
+	include/matcherd/order.hpp
+	include/matcherd/offer.hpp
 )
 
 set(test_sources
-  src/tmp_test.cpp
+	#src/tmp_test.cpp
 )
