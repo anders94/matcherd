@@ -77,7 +77,7 @@ int main(void) {
     bool chatty = false;
     int count = 0;
 
-    while (count < 100000) {
+    while (count < 1000000) {
         std::deque<fill> fills; // the fills this order generates
 
         // await the next order
@@ -113,7 +113,7 @@ int main(void) {
                                 std::cout << "FILL " << ord.volume << " @ " << ord.price << '\n';
 
                             fill f = build_fill(mit->second.at(0), ord);
-                            redis.publish("fills", stringify_fill(f));
+                            fills.push_back(f);
 
                             mit->second.at(0).volume -= ord.volume;
                             ord.volume = 0;
@@ -123,7 +123,7 @@ int main(void) {
                                 std::cout << "FILL " << mit->second.at(0).volume << " @ " << ord.price << '\n';
 
                             fill f = build_fill(mit->second.at(0), ord);
-                            redis.publish("fills", stringify_fill(f));
+                            fills.push_back(f);
 
                             ord.volume -= mit->second.at(0).volume;
                             // remove offer from queue
@@ -173,7 +173,7 @@ int main(void) {
                                 std::cout << "FILL " << ord.volume << " @ " << ord.price << '\n';
 
                             fill f = build_fill(mit->second.at(0), ord);
-                            redis.publish("fills", stringify_fill(f));
+                            fills.push_back(f);
 
                             mit->second.at(0).volume -= ord.volume;
                             ord.volume = 0;
@@ -183,7 +183,7 @@ int main(void) {
                                 std::cout << "FILL " << mit->second.at(0).volume << " @ " << ord.price << '\n';
 
                             fill f = build_fill(mit->second.at(0), ord);
-                            redis.publish("fills", stringify_fill(f));
+                            fills.push_back(f);
 
                             ord.volume -= mit->second.at(0).volume;
                             // remove offer from queue
@@ -207,6 +207,7 @@ int main(void) {
                     off.offerId = ord.orderId;
                     off.volume = ord.volume;
                     sells[ord.price].push_back(off);
+                    redis.publish("offers", stringify_offer(off));
 
                 }
 
@@ -214,6 +215,10 @@ int main(void) {
             else
                 std::cout << "Side must be B or S\n";
 
+        }
+
+        for (int f = 0; f < fills.size(); f++) {
+            redis.publish("fills", stringify_fill(fills[f]));
         }
 
         if (chatty) {

@@ -7,3 +7,12 @@ struct offer {
     uint64_t offerId;
     uint64_t volume;
 };
+
+std::string stringify_offer(offer o) {
+    std::string s;
+
+    s = std::to_string(o.offerId) + "|" + std::to_string(o.volume);
+
+    return s;
+
+}
