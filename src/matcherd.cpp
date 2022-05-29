@@ -1,21 +1,18 @@
-#include <sw/redis++/redis++.h>
 #include <iostream>
 
-#include "project/order.hpp"
-#include "project/offer.hpp"
+#include "matcherd/order.hpp"
+#include "matcherd/offer.hpp"
 
 // single threaded matcher
 
-void print_queue(std::deque<offer> q)
-{
+void print_queue(std::deque<offer> q) {
     for(offer o : q) {
       std::cout << o.volume << ' ';
     }
     std::cout << '\n';
 }
 
-void print_map(const std::map<uint64_t, std::deque<offer>>& m)
-{
+void print_map(const std::map<uint64_t, std::deque<offer>>& m) {
     for (const auto& [k, q] : m) {
         std::cout << '[' << k << "] ";
         print_queue(q);
@@ -23,7 +20,7 @@ void print_map(const std::map<uint64_t, std::deque<offer>>& m)
     std::cout << '\n';
 }
 
-void parse_order(std::string *s, order *o) { // make this faster by not copying the string and order around
+void parse_order(std::string *s, order *o) {
     std::string delimiter = "|";
     size_t pos = 0;
 
