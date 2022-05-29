@@ -1,4 +1,8 @@
 #include <iostream>
+#include <deque>
+#include <map>
+
+#include <sw/redis++/redis++.h>
 
 #include "matcherd/order.hpp"
 #include "matcherd/offer.hpp"

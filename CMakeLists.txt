@@ -14,6 +14,9 @@ project(
 # Project options
 #
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 include(cmake/StandardSettings.cmake)
 include(cmake/StaticAnalyzers.cmake)
 include(cmake/Utils.cmake)
@@ -193,6 +196,20 @@ verbose_message("Successfully added all dependencies and linked against them.")
 # Set the build/user include directories
 #
 
+find_path(HIREDIS_HEADER hiredis)
+target_include_directories(${PROJECT_NAME} PUBLIC ${HIREDIS_HEADER})
+
+find_library(HIREDIS_LIB hiredis)
+target_link_libraries(${PROJECT_NAME} ${HIREDIS_LIB})
+
+find_path(REDIS_PLUS_PLUS_HEADER sw)
+target_include_directories(${PROJECT_NAME} PUBLIC ${REDIS_PLUS_PLUS_HEADER})
+
+find_library(REDIS_PLUS_PLUS_LIB redis++)
+target_link_libraries(${PROJECT_NAME} ${REDIS_PLUS_PLUS_LIB})
+
+message(STATUS "Finished setting up include directories.")
+
 # Allow usage of header files in the `src` directory, but only for utilities
 if(${PROJECT_NAME}_BUILD_HEADERS_ONLY)
   target_include_directories(
@@ -221,8 +238,6 @@ else()
     )
   endif()
 endif()
-
-message(STATUS "Finished setting up include directories.")
 
 #
 # Provide alias to library for
