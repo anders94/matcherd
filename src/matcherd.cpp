@@ -6,6 +6,7 @@
 
 #include "matcherd/order.hpp"
 #include "matcherd/offer.hpp"
+#include "matcherd/fill.hpp"
 
 // single threaded matcher
 
@@ -30,7 +31,7 @@ void parse_order(std::string *s, order *o) {
 
     try {
         if ((pos = s->find(delimiter)) != std::string::npos) {
-            o->userId = std::stoull(s->substr(0, pos));
+            o->orderId = std::stoull(s->substr(0, pos));
             s->erase(0, pos + delimiter.length());
             if ((pos = s->find(delimiter)) != std::string::npos) {
                 o->side = s->substr(0, pos);
@@ -57,6 +58,16 @@ void parse_order(std::string *s, order *o) {
 
 }
 
+fill build_fill(offer off, order ord) {
+    fill f;
+    f.offerId = off.offerId;
+    f.price = ord.price;
+    f.takerId = ord.orderId;
+    f.volume = off.volume;
+
+    return f;
+}
+
 int main(void) {
     auto redis = sw::redis::Redis("tcp://127.0.0.1:6379/0");
 
@@ -66,7 +77,9 @@ int main(void) {
     bool chatty = false;
     int count = 0;
 
-    while (count < 1000000) {
+    while (count < 100000) {
+        std::deque<fill> fills; // the fills this order generates
+
         // await the next order
         auto value = redis.blpop("btc-usd");
 
@@ -98,17 +111,23 @@ int main(void) {
                         if (ord.volume < mit->second.at(0).volume) {
                             if (chatty)
                                 std::cout << "FILL " << ord.volume << " @ " << ord.price << '\n';
+
+                            fill f = build_fill(mit->second.at(0), ord);
+                            redis.publish("fills", stringify_fill(f));
+
                             mit->second.at(0).volume -= ord.volume;
                             ord.volume = 0;
-                            // TODO: publish fill
                         }
                         else { // volume >= mit->second.at(0).volume
                             if (chatty)
                                 std::cout << "FILL " << mit->second.at(0).volume << " @ " << ord.price << '\n';
+
+                            fill f = build_fill(mit->second.at(0), ord);
+                            redis.publish("fills", stringify_fill(f));
+
                             ord.volume -= mit->second.at(0).volume;
                             // remove offer from queue
                             mit->second.pop_front();
-                            // TODO: publish fill
 
                             // if queue is empty, remove queue from map
                             if (mit->second.empty())
@@ -125,7 +144,7 @@ int main(void) {
                 // if left over, add to buys
                 if (ord.volume > 0) {
                     offer off;
-                    off.userId = ord.userId;
+                    off.offerId = ord.orderId;
                     off.volume = ord.volume;
                     buys[ord.price].push_back(off);
 
@@ -152,13 +171,20 @@ int main(void) {
                         if (ord.volume < mit->second.at(0).volume) {
                             if (chatty)
                                 std::cout << "FILL " << ord.volume << " @ " << ord.price << '\n';
+
+                            fill f = build_fill(mit->second.at(0), ord);
+                            redis.publish("fills", stringify_fill(f));
+
                             mit->second.at(0).volume -= ord.volume;
                             ord.volume = 0;
-                            // TODO: publish fill
                         }
                         else { // volume >= mit->second.at(0).volume
                             if (chatty)
                                 std::cout << "FILL " << mit->second.at(0).volume << " @ " << ord.price << '\n';
+
+                            fill f = build_fill(mit->second.at(0), ord);
+                            redis.publish("fills", stringify_fill(f));
+
                             ord.volume -= mit->second.at(0).volume;
                             // remove offer from queue
                             mit->second.pop_front();
@@ -178,7 +204,7 @@ int main(void) {
 
                 if (ord.volume > 0) {
                     offer off;
-                    off.userId = ord.userId;
+                    off.offerId = ord.orderId;
                     off.volume = ord.volume;
                     sells[ord.price].push_back(off);
 
@@ -199,7 +225,7 @@ int main(void) {
         }
 
         // throw some artificial delay in there so we can see things working at human speed
-        //std::this_thread::sleep_for (std::chrono::milliseconds(100));
+        //std::this_thread::sleep_for (std::chrono::milliseconds(500));
 
         count++;
 
