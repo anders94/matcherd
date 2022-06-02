@@ -26,6 +26,17 @@ jobs:
         path: ${{ github.workspace }}/${{ env.INSTALL_LOCATION }}
         key: ${{ runner.os }}-dependencies
 
+    - name: install redis
+      run: sudo apt-get install libhiredis-dev
+        cd /tmp
+        git clone https://github.com/sewenew/redis-plus-plus.git
+        cd redis-plus-plus
+        mkdir build
+        cd build
+        cmake -DREDIS_PLUS_PLUS_CXX_STANDARD=17 ..
+        make
+        sudo make install
+
     - name: install GoogleTest
       if: ${{ steps.cache.output.cache-hit != 'true' }}
       run: |
