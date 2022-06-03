@@ -53,7 +53,7 @@ jobs:
       run: cmake -Bbuild -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/$INSTALL_LOCATION
       
     - name: build
-      run: cmake --build build --config $BUILD_TYPE -j4
+      run: cmake --build build --target matcherd --config $BUILD_TYPE -j4
 
     - name: run tests
       run: |
