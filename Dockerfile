@@ -21,7 +21,8 @@ RUN apt install -y \
 			python3-pip \
 			tar \
 			unzip \
-			vim
+			vim \
+			libhiredis-dev
 
 RUN echo "Installing dependencies not found in the package repos..."
 
@@ -50,3 +51,11 @@ RUN git clone https://github.com/google/googletest.git --branch release-1.10.0 &
 RUN git clone https://github.com/microsoft/vcpkg -b 2020.06 && \
 		cd vcpkg && \
 		./bootstrap-vcpkg.sh -disableMetrics -useSystemBinaries	
+
+RUN git clone https://github.com/sewenew/redis-plus-plus.git && \
+        cd redis-plus-plus && \
+        mkdir build && \
+        cd build && \
+        cmake -DREDIS_PLUS_PLUS_CXX_STANDARD=17 .. && \
+        make && \
+        sudo make install
