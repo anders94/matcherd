@@ -58,8 +58,9 @@ void parse_order(std::string *s, order *o) {
 
 }
 
-fill build_fill(offer off, order ord) {
+fill build_fill(uint64_t seq, offer off, order ord) {
     fill f;
+    f.sequence = seq;
     f.offerId = off.offerId;
     f.price = ord.price;
     f.takerId = ord.orderId;
@@ -75,9 +76,9 @@ int main(void) {
     std::map<uint64_t, std::deque<offer>> sells { };
 
     bool chatty = false;
-    int count = 0;
+    uint64_t sequence = 0;
 
-    while (count < 1000000) {
+    while (sequence < 1000000) {
         std::deque<fill> fills; // the fills this order generates
 
         // await the next order
@@ -112,7 +113,7 @@ int main(void) {
                             if (chatty)
                                 std::cout << "FILL " << ord.volume << " @ " << ord.price << '\n';
 
-                            fill f = build_fill(mit->second.at(0), ord);
+                            fill f = build_fill(sequence, mit->second.at(0), ord);
                             fills.push_back(f);
 
                             mit->second.at(0).volume -= ord.volume;
@@ -122,7 +123,7 @@ int main(void) {
                             if (chatty)
                                 std::cout << "FILL " << mit->second.at(0).volume << " @ " << ord.price << '\n';
 
-                            fill f = build_fill(mit->second.at(0), ord);
+                            fill f = build_fill(sequence, mit->second.at(0), ord);
                             fills.push_back(f);
 
                             ord.volume -= mit->second.at(0).volume;
@@ -172,7 +173,7 @@ int main(void) {
                             if (chatty)
                                 std::cout << "FILL " << ord.volume << " @ " << ord.price << '\n';
 
-                            fill f = build_fill(mit->second.at(0), ord);
+                            fill f = build_fill(sequence, mit->second.at(0), ord);
                             fills.push_back(f);
 
                             mit->second.at(0).volume -= ord.volume;
@@ -182,7 +183,7 @@ int main(void) {
                             if (chatty)
                                 std::cout << "FILL " << mit->second.at(0).volume << " @ " << ord.price << '\n';
 
-                            fill f = build_fill(mit->second.at(0), ord);
+                            fill f = build_fill(sequence, mit->second.at(0), ord);
                             fills.push_back(f);
 
                             ord.volume -= mit->second.at(0).volume;
@@ -232,7 +233,7 @@ int main(void) {
         // throw some artificial delay in there so we can see things working at human speed
         //std::this_thread::sleep_for (std::chrono::milliseconds(500));
 
-        count++;
+        sequence++;
 
     }
 

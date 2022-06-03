@@ -9,6 +9,7 @@ set(exe_sources
 set(headers
 	include/matcherd/order.hpp
 	include/matcherd/offer.hpp
+	include/matcherd/fill.hpp
 )
 
 set(test_sources
