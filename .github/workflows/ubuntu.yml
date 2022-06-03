@@ -26,10 +26,10 @@ jobs:
         path: ${{ github.workspace }}/${{ env.INSTALL_LOCATION }}
         key: ${{ runner.os }}-dependencies
 
-    - name: install redis
+    - name: install Prerequisites
       run: |
         sudo apt-get install libhiredis-dev
-        cd /tmp
+        cd 
         git clone https://github.com/sewenew/redis-plus-plus.git
         cd redis-plus-plus
         mkdir build
